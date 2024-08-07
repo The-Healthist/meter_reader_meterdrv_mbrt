@@ -138,6 +138,10 @@ func (pm *PowerMeter) Init(gw *gateway.MBRTGateway, meterModel uint8, slaveAddr 
 	if meterModel == METER_MODEL_DDS4921 {
 		pm.regMeta = regMetaDDS4921
 		pm.SwitchMeta = switchMetaDDS4921
+	} else {
+		// invalid meter model
+		err = errors.New("invalid meter type")
+		return
 	}
 	pm.gateway = gw
 	pm.slaveAddr = slaveAddr

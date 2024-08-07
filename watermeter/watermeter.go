@@ -189,7 +189,7 @@ err error: error
 */
 func (wm *WaterMeter) SetValve(turn uint8, stat bool) (err error) {
 	wm.gateway.GetClient().SetUnitId(wm.slaveAddr)
-	for retry := 3; ; retry-- {
+	for retry := 30; ; retry-- {
 		if wm.valveMeta[turn].statusRegType == REGTYPE_COIL {
 			err = wm.gateway.GetClient().WriteCoil(
 				wm.valveMeta[turn].ctlAddr,
