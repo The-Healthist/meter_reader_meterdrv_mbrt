@@ -2,3 +2,5 @@ github.com/goburrow/serial v0.1.0 h1:v2T1SQa/dlUqQiYIT8+Cu7YolfqAi3K96UmhwYyuSrA
 github.com/goburrow/serial v0.1.0/go.mod h1:sAiqG0nRVswsm1C97xsttiYCzSLBmUZ/VSlVLZJ8haA=
 github.com/kontornl/modbus v0.0.0-20240725033137-91413c91c997 h1:7v9QtOTOhGdQsHByxqo2TKx5L35Jcd/Rw7RCHDe8jLo=
 github.com/kontornl/modbus v0.0.0-20240725033137-91413c91c997/go.mod h1:f3S6AFS0cYHsGdRonjOnZ4wnqOSLfirzy0s860N6bSY=
+github.com/kontornl/modbus v0.0.0-20240812060322-5bb854cfe37e h1:alhEqyBQgfMTcFDoDmBe203c5D3aHFPVAIlWWnbqupc=
+github.com/kontornl/modbus v0.0.0-20240812060322-5bb854cfe37e/go.mod h1:f3S6AFS0cYHsGdRonjOnZ4wnqOSLfirzy0s860N6bSY=
