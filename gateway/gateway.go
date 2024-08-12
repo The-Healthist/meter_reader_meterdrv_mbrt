@@ -28,6 +28,7 @@ func (gw *MBRTGateway) Init(netAddr string, baudRate uint, timeout time.Duration
 	if gw.cli != nil {
 		// (23/07/2024 kontornl) may cause memory leak, need inspection
 		err := gw.cli.Close()
+		time.Sleep(100 * time.Millisecond)
 		if err != nil {
 			return err
 		}
@@ -49,8 +50,14 @@ func (gw *MBRTGateway) Init(netAddr string, baudRate uint, timeout time.Duration
 }
 
 func (gw *MBRTGateway) Reconnect() (err error) {
-	gw.cli.Close()
-	err = gw.cli.Open()
+	for retry := 0; retry <= 5; retry++ {
+		gw.cli.Close()
+		time.Sleep(time.Duration(retry) * 50 * time.Millisecond)
+		err = gw.cli.Open()
+		if err == nil {
+			break
+		}
+	}
 	return
 }
 

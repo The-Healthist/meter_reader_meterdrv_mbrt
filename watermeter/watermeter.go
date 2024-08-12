@@ -11,7 +11,6 @@ package watermeter
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/The-Healthist/meter_reader_meterdrv_mbrt/gateway"
 
@@ -106,7 +105,7 @@ func (wm *WaterMeter) GetVal(id uint8) (ret float64, err error) {
 			wm.regMeta[id].length,
 			modbus.HOLDING_REGISTER,
 		)
-		time.Sleep(50 * time.Millisecond)
+		// time.Sleep(50 * time.Millisecond)
 		if err != nil {
 			if retry > 0 {
 				err = wm.gateway.Reconnect()
@@ -163,7 +162,7 @@ func (wm *WaterMeter) GetValve(turn uint8) (stat bool, err error) {
 			err = errors.New("invalid register type")
 			return
 		}
-		time.Sleep(50 * time.Millisecond)
+		// time.Sleep(50 * time.Millisecond)
 		if err != nil {
 			if retry > 0 {
 				err = wm.gateway.Reconnect()
@@ -214,7 +213,7 @@ func (wm *WaterMeter) SetValve(turn uint8, stat bool) (err error) {
 			err = errors.New("invalid register type")
 			return
 		}
-		time.Sleep(50 * time.Millisecond)
+		// time.Sleep(50 * time.Millisecond)
 		if err != nil {
 			if retry > 0 {
 				err = wm.gateway.Reconnect()
