@@ -11,6 +11,7 @@ package watermeter
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/The-Healthist/meter_reader_meterdrv_mbrt/gateway"
 
@@ -90,6 +91,7 @@ err error: error
 func (wm *WaterMeter) GetVal(id uint8) (ret float64, err error) {
 	var regval []uint16
 	ret = 0.0
+	time.Sleep(50 * time.Millisecond)
 	wm.gateway.GetClient().SetUnitId(wm.slaveAddr)
 	if wm.regMeta[id].length == 0 {
 		err = errors.New("undefined register metadata")
@@ -105,7 +107,6 @@ func (wm *WaterMeter) GetVal(id uint8) (ret float64, err error) {
 			wm.regMeta[id].length,
 			modbus.HOLDING_REGISTER,
 		)
-		// time.Sleep(50 * time.Millisecond)
 		if err != nil {
 			if retry > 0 {
 				err = wm.gateway.Reconnect()
@@ -145,6 +146,7 @@ func (wm *WaterMeter) GetValve(turn uint8) (stat bool, err error) {
 	var regval uint16
 	stat = false
 	wm.gateway.GetClient().SetUnitId(wm.slaveAddr)
+	time.Sleep(50 * time.Millisecond)
 	// (23/07/2024 kontornl) the register may just a coil, not a holding register
 	for retry := 3; ; retry-- {
 		if wm.valveMeta[turn].statusRegType == REGTYPE_COIL {
@@ -162,7 +164,6 @@ func (wm *WaterMeter) GetValve(turn uint8) (stat bool, err error) {
 			err = errors.New("invalid register type")
 			return
 		}
-		// time.Sleep(50 * time.Millisecond)
 		if err != nil {
 			if retry > 0 {
 				err = wm.gateway.Reconnect()
@@ -191,6 +192,7 @@ stat bool: switch status, true is opened (turned on), false is closed (turned of
 err error: error
 */
 func (wm *WaterMeter) SetValve(turn uint8, stat bool) (err error) {
+	time.Sleep(50 * time.Millisecond)
 	wm.gateway.GetClient().SetUnitId(wm.slaveAddr)
 	for retry := 30; ; retry-- {
 		if wm.valveMeta[turn].statusRegType == REGTYPE_COIL {
@@ -213,7 +215,6 @@ func (wm *WaterMeter) SetValve(turn uint8, stat bool) (err error) {
 			err = errors.New("invalid register type")
 			return
 		}
-		// time.Sleep(50 * time.Millisecond)
 		if err != nil {
 			if retry > 0 {
 				err = wm.gateway.Reconnect()
