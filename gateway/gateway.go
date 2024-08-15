@@ -26,13 +26,17 @@ err error: error
 func (gw *MBRTGateway) Init(netAddr string, baudRate uint, timeout time.Duration) (err error) {
 	var cli *modbus.ModbusClient
 	if gw.cli != nil {
-		// (23/07/2024 kontornl) may cause memory leak, need inspection
-		err := gw.cli.Close()
-		time.Sleep(100 * time.Millisecond)
-		if err != nil {
-			return err
+		if gw.baudRate != baudRate || gw.timeout != timeout {
+			// (23/07/2024 kontornl) may cause memory leak without deleting, need inspection
+			err := gw.cli.Close()
+			time.Sleep(100 * time.Millisecond)
+			if err != nil {
+				return err
+			}
 		}
 	}
+	gw.baudRate = baudRate
+	gw.timeout = timeout
 	cli, err = modbus.NewClient(&modbus.ClientConfiguration{
 		URL:     netAddr,
 		Speed:   baudRate,
@@ -43,7 +47,7 @@ func (gw *MBRTGateway) Init(netAddr string, baudRate uint, timeout time.Duration
 	}
 	err = cli.Open()
 	if err != nil {
-		return err
+		return
 	}
 	gw.cli = cli
 	return
@@ -67,7 +71,9 @@ func (gw *MBRTGateway) GetClient() (cli *modbus.ModbusClient) {
 }
 
 type MBRTGateway struct {
-	cli *modbus.ModbusClient
+	cli      *modbus.ModbusClient
+	baudRate uint
+	timeout  time.Duration
 }
 
 type IMBRTGateway interface {
