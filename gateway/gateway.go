@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"sync"
 	"time"
 
 	"github.com/kontornl/modbus"
@@ -70,10 +71,16 @@ func (gw *MBRTGateway) GetClient() (cli *modbus.ModbusClient) {
 	return
 }
 
+func (gw *MBRTGateway) GetLock() (mtx *sync.RWMutex) {
+	mtx = &gw.mtx
+	return
+}
+
 type MBRTGateway struct {
 	cli      *modbus.ModbusClient
 	BaudRate uint
 	Timeout  time.Duration
+	mtx      sync.RWMutex
 }
 
 type IMBRTGateway interface {
