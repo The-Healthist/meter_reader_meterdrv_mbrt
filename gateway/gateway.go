@@ -1,7 +1,10 @@
 package gateway
 
 import (
+	"net"
+	"os"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/kontornl/modbus"
@@ -24,18 +27,23 @@ timeout time.Duration: operation time-out
 
 err error: error
 */
+
+func (gw *MBRTGateway) Reinit() (err error) {
+	err = gw.Init(gw.netAddr, gw.BaudRate, gw.Timeout)
+	return
+}
 func (gw *MBRTGateway) Init(netAddr string, baudRate uint, timeout time.Duration) (err error) {
 	var cli *modbus.ModbusClient
 	if gw.cli != nil {
 		if gw.BaudRate != baudRate || gw.Timeout != timeout {
 			// (23/07/2024 kontornl) may cause memory leak without deleting, need inspection
-			err := gw.cli.Close()
+			// (16/08/2024 kontornl) close without checking error after it
+			// willing to reopen no matter what happened here ,especially errNetClosing
+			gw.cli.Close()
 			time.Sleep(100 * time.Millisecond)
-			if err != nil {
-				return err
-			}
 		}
 	}
+	gw.netAddr = netAddr
 	gw.BaudRate = baudRate
 	gw.Timeout = timeout
 	cli, err = modbus.NewClient(&modbus.ClientConfiguration{
@@ -46,7 +54,19 @@ func (gw *MBRTGateway) Init(netAddr string, baudRate uint, timeout time.Duration
 	if err != nil {
 		return
 	}
+	if gw.LastErr != nil {
+		if assertedErr, ok := gw.LastErr.(*net.OpError); ok {
+			if assertedErr, ok := assertedErr.Err.(*os.SyscallError); ok {
+				if errNo, ok := assertedErr.Err.(syscall.Errno); ok {
+					if errNo == syscall.ECONNREFUSED || errNo == 0x274d /* WSAECONNREFUSED */ {
+						time.Sleep(5 * time.Second)
+					}
+				}
+			}
+		}
+	}
 	err = cli.Open()
+	gw.LastErr = err
 	if err != nil {
 		return
 	}
@@ -58,11 +78,13 @@ func (gw *MBRTGateway) Reconnect() (err error) {
 	for retry := 0; retry <= 5; retry++ {
 		gw.cli.Close()
 		time.Sleep(time.Duration(retry) * 50 * time.Millisecond)
+		// check lasterr
 		err = gw.cli.Open()
 		if err == nil {
 			break
 		}
 	}
+	gw.LastErr = err
 	return
 }
 
@@ -79,8 +101,10 @@ func (gw *MBRTGateway) GetLock() (mtx *sync.RWMutex) {
 type MBRTGateway struct {
 	cli      *modbus.ModbusClient
 	BaudRate uint
+	netAddr  string
 	Timeout  time.Duration
 	mtx      sync.RWMutex
+	LastErr  error
 }
 
 type IMBRTGateway interface {

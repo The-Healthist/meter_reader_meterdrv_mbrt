@@ -92,6 +92,9 @@ func (wm *WaterMeter) GetVal(id uint8) (ret float64, err error) {
 	var regval []uint16
 	ret = 0.0
 	time.Sleep(50 * time.Millisecond)
+	if wm.gateway.GetClient() == nil {
+		wm.gateway.Reinit()
+	}
 	wm.gateway.GetClient().SetUnitId(wm.slaveAddr)
 	if wm.regMeta[id].length == 0 {
 		err = errors.New("undefined register metadata")
@@ -145,6 +148,9 @@ err error: error
 func (wm *WaterMeter) GetValve(turn uint8) (stat bool, err error) {
 	var regval uint16
 	stat = false
+	if wm.gateway.GetClient() == nil {
+		wm.gateway.Reinit()
+	}
 	wm.gateway.GetClient().SetUnitId(wm.slaveAddr)
 	time.Sleep(50 * time.Millisecond)
 	// (23/07/2024 kontornl) the register may just a coil, not a holding register
@@ -193,6 +199,9 @@ err error: error
 */
 func (wm *WaterMeter) SetValve(turn uint8, stat bool) (err error) {
 	time.Sleep(50 * time.Millisecond)
+	if wm.gateway.GetClient() == nil {
+		wm.gateway.Reinit()
+	}
 	wm.gateway.GetClient().SetUnitId(wm.slaveAddr)
 	for retry := 30; ; retry-- {
 		if wm.valveMeta[turn].statusRegType == REGTYPE_COIL {
@@ -223,6 +232,7 @@ func (wm *WaterMeter) SetValve(turn uint8, stat bool) (err error) {
 				return
 			}
 		} else {
+			time.Sleep(200 * time.Millisecond)
 			break
 		}
 	}

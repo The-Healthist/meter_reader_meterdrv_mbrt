@@ -11,6 +11,7 @@ package powermeter
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/The-Healthist/meter_reader_meterdrv_mbrt/gateway"
 
@@ -162,6 +163,10 @@ ret float64: value in float64, the unit might be one of the following: Vrms, Arm
 err error: error
 */
 func (pm *PowerMeter) GetVal(id uint8) (ret float64, err error) {
+	time.Sleep(5 * time.Millisecond)
+	if pm.gateway.GetClient() == nil {
+		pm.gateway.Reinit()
+	}
 	pm.gateway.GetClient().SetUnitId(pm.slaveAddr)
 	var regval []uint16
 	ret = 0.0
@@ -215,6 +220,10 @@ stat bool: switch status, true is closed (turned on), false is tripped (turned o
 err error: error
 */
 func (pm *PowerMeter) GetSwitchStatus(turn uint8) (stat bool, err error) {
+	time.Sleep(5 * time.Millisecond)
+	if pm.gateway.GetClient() == nil {
+		pm.gateway.Reinit()
+	}
 	pm.gateway.GetClient().SetUnitId(pm.slaveAddr)
 	var regval uint16
 	stat = false
@@ -254,6 +263,10 @@ turn uint8: which switch should be operated, give operand using macro such as PO
 err error: error
 */
 func (pm *PowerMeter) Trip(turn uint8) (err error) {
+	time.Sleep(5 * time.Millisecond)
+	if pm.gateway.GetClient() == nil {
+		pm.gateway.Reinit()
+	}
 	pm.gateway.GetClient().SetUnitId(pm.slaveAddr)
 	for retry := 3; ; retry-- {
 		err = pm.gateway.GetClient().WriteRegisters(pm.SwitchMeta[turn].ctlAddr, []uint16{pm.SwitchMeta[turn].ctlTripCmd})
@@ -265,6 +278,7 @@ func (pm *PowerMeter) Trip(turn uint8) (err error) {
 				return
 			}
 		} else {
+			time.Sleep(200 * time.Millisecond)
 			break
 		}
 	}
@@ -291,6 +305,10 @@ turn uint8: which switch should be operated, give operand using macro such as PO
 err error: error
 */
 func (pm *PowerMeter) Close(turn uint8) (err error) {
+	time.Sleep(5 * time.Millisecond)
+	if pm.gateway.GetClient() == nil {
+		pm.gateway.Reinit()
+	}
 	pm.gateway.GetClient().SetUnitId(pm.slaveAddr)
 	for retry := 3; ; retry-- {
 		err = pm.gateway.GetClient().WriteRegisters(pm.SwitchMeta[turn].ctlAddr, []uint16{pm.SwitchMeta[turn].ctlCloseCmd})
@@ -302,6 +320,7 @@ func (pm *PowerMeter) Close(turn uint8) (err error) {
 				return
 			}
 		} else {
+			time.Sleep(200 * time.Millisecond)
 			break
 		}
 	}
